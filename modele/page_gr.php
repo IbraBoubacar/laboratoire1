@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="../vue/bootstrap/css/bootstrap.css" rel="stylesheet">
+	 <meta charset="utf-8"> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Laboratoire</title>
+    <meta name="description" content="Le site de la maison de l'architecture">
+	<style type="text/css">
+	</style>
+	</head>
+	<body>
+	<div class="container">
+
+<?php
+
+$nbre_message=50;
+include('connexion.php');
+$req=$bdd->prepare('SELECT p.pa_dossier dossier,p.pa_numero numero,gr.gr_numero gr_numero,DAY(gr.gr_dateprelevement) AS jour,MONTH(gr.gr_dateprelevement) AS mois,YEAR(gr.gr_dateprelevement) AS annees FROM patient p INNER JOIN grossesse gr on p.pa_numero=cv.cv_dossier ORDER BY numero DESC LIMIT :nbre_page,:page');
+$req->bindValue('nbre_page',isset($_GET['page'])?$_GET['page']* $nbre_message:0, PDO::PARAM_INT);
+$req->bindValue('page',$nbre_message, PDO::PARAM_INT);
+$req->execute();
+
+?>
+
+<table class="table table-bordered table-stripped table-condensed" style="margin-top:03px">
+	<caption><h4>Grossesse<h4></caption>
+
+<?php
+while ($donnees=$req->fetch())
+{
+?>
+
+	<tr class="success">
+		<td ><?php echo $donnees['dossier'];?>
+		</td>
+		<td style="width:450px"><?php echo $donnees['jour'].'/'.$donnees['mois'].'/'.$donnees['annees'];?>
+		</td>
+		<td><a target="_blank" href="page_cv_impression.php?page=<?php echo $donnees['gr_numero'];?>">Imprimer</a></td>
+	</tr>
+	
+	
+	
+<?php	
+}
+?>
+
+</table>
+
+<?php
+
+include ('connexion.php'); 
+$req=$bdd->query('SELECT COUNT(*) AS nombre FROM patient p INNER JOIN chargevirale cv ON p.pa_numero=cv.cv_dossier');
+
+$donnees=$req->fetch();
+$nombre=$donnees['nombre'];
+$nombre_page=$nombre/2;
+
+ for ($nombre_ini=1;$nombre_ini<30;$nombre_ini++)
+ {
+	
+echo '<a href="page_cv.php?page='.$nombre_ini.'"><button type="button" class="btn btn-info btn-sm">'.$nombre_ini.'</button></a>';	
+	 
+ }
+
+?>
+<a href ="../vue/chargevirale.php"><button type="button" class="btn btn-info btn-sm">Retour</button></a>
+</div>
+</body>
+
+</html>
